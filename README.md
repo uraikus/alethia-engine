@@ -61,6 +61,8 @@ class Tile extends Asset {
   setScale(z:Number): undefined // Modifies the scale/zoom of the Scene
   
   keyPressed(key:String): Boolean // Returns true if the key is being pressed
+  
+  unselectAll(): undefined // Unselects all selected assets
 ```
 ### Listeners
 ```
@@ -74,11 +76,11 @@ class Tile extends Asset {
   
   state:State // See Scriptleaf State API
   
-  floor:Element
+  floor:Element // The background element
   
-  background:String
+  background:String // URL to image
   
-  fixedBackground:String
+  fixedBackground:String // URL to image
   
   innerWidth:Number
   
@@ -101,6 +103,10 @@ class Tile extends Asset {
   getScene(): Scene || false // Returns the Scene Object or false if not attached
   
   rotate(deg:Number): undefined // Rotates DOM Element's transform
+  
+  select(): onselect listener return value
+  
+  unselect(): onunselect listener return value
 ```
 ### Listeners
 ```
@@ -112,7 +118,9 @@ class Tile extends Asset {
   
   oncollision(collidedObject:Asset):Boolean // if returns false, overlapping movement will not incur. Default returns false when collision is between two solid Assets.
   
-  onselected(undefined)
+  onselect(undefined) // By default fires whenever the asset is clicked or included in a drag box
+  
+  onunselect(undefined) // By default fires whenever the background is clicked
 ```
 ### Properties
 ```

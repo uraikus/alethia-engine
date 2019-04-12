@@ -1,12 +1,12 @@
 dependencies:
-  scriptleaf: 1.1.15
+  scriptleaf: 1.1.16
 packages:
-  /scriptleaf/1.1.15:
+  /scriptleaf/1.1.16:
     dev: false
     resolution:
-      integrity: sha512-IC7TF9aVIJRqbAoqc/lasESSln4/26vK3e7wYb5Rls2GH8s/ii47tSz1fOKDjNQW8SUYONfFtmH7tpN89372Dg==
+      integrity: sha512-K/kNkRCWdjXAA91BCt5j1A0RBlDJXl+dGbLHqVQgKvYNvNeRsmqOc9ZpKoI5F7F7wxaihzT4HbAshuaHlLHnUw==
 registry: 'https://registry.npmjs.org/'
 shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
-  scriptleaf: ^1.1.15
+  scriptleaf: ^1.1.16
