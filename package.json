@@ -1,0 +1,26 @@
+{
+  "name": "alethia-engine",
+  "version": "1.0.27",
+  "description": "A general purpose application engine.",
+  "main": "main.js",
+  "author": "Patrick Trester",
+  "files": [
+    "/src"
+  ],
+  "dependencies": {
+    "scriptleaf": "^1.1.15"
+  },
+  "engines": {
+    "node": "10.x"
+  },
+  "repository": {
+    "glitch": "https://glitch.com/~alethia-engine",
+    "git": "https://github.com/uraikus/alethia-engine"
+  },
+  "license": "MIT",
+  "keywords": [
+    "game",
+    "software",
+    "renderer"
+  ]
+}
