@@ -15,7 +15,7 @@ class Asset {
       width: 20,
       height: 20,
       style: { position: 'absolute', backgroundSize: 'fill' },
-      elem: {},
+      elem: { className: 'asset' },
       changeSprite: this.changeSprite.bind(this),
       validateMovement: this.validateMovement.bind(this),
       move: this.move.bind(this),
@@ -24,7 +24,9 @@ class Asset {
       focus: this.focus.bind(this),
       destroyInstance: this.destroyInstance.bind(this),
       getScene: this.getScene.bind(this),
-      rotate: this.rotate.bind(this)
+      rotate: this.rotate.bind(this),
+      select: this.select.bind(this),
+      unselect: this.unselect.bind(this)
     }
     assignObject(this, defaults, overide)
     this.id = this.id || randID()
@@ -39,6 +41,7 @@ class Asset {
     if (this.getScene() !== false) this.scene.addAsset(this)
     if (typeof this.sprite === 'string') this.changeSprite(this.sprite)
     this.place(this.x, this.y)
+    this.elem.addEventListener('mousedown', this.select.bind(this))
   }
   
   oncollision (object) {
@@ -140,6 +143,20 @@ class Asset {
   
   rotate (deg) {
     this.elem.style.transform = `rotate(${deg}deg)`
+  }
+  
+  select () {
+    let scene = this.getScene()
+    if (scene === false) return false
+    scene.selected[this.id] = this
+    if (typeof this.onselect === 'function') return this.onselect()
+  }
+  
+  unselect () {
+    let scene = this.getScene()
+    if (scene === false) return false
+    delete scene.selected[this.id]
+    if (typeof this.onunselect === 'function') return this.onunselect()
   }
 }
 
