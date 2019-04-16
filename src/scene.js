@@ -53,26 +53,29 @@ class Scene {
       this.mouseBox.x = []
       this.mouseBox.y = []
       this.floor.addEventListener('mousedown', ev => {
-        this.mouseBox.mouseDown = true
-        this.mouseBox.x[0] = ev.offsetX
-        this.mouseBox.y[0] = ev.offsetY
+        if (ev.button === 0) {
+          this.mouseBox.mouseDown = true
+          this.mouseBox.x[0] = ev.offsetX
+          this.mouseBox.y[0] = ev.offsetY
+        }
       })
       window.addEventListener('mouseup', ev => {
+        if (ev.button !== 0) return undefined
         if (this.mouseBox.mouseDown === true) {
-          let boxX = this.mouseBox.x
-          let boxY = this.mouseBox.y
           let selected = []
           this.mouseBox.mouseDown = false
           this.unselectAll()
-          let startX = Math.round(boxX[0] < boxX[1] ? boxX[0] : boxX[1] / this.scale)
-          let startY = Math.round(boxY[0] < boxY[1] ? boxY[0] : boxY[1] / this.scale)
-          let endX = Math.round(boxX[0] > boxX[1] ? boxX[0] : boxX[1] / this.scale)
-          let endY = Math.round(boxY[0] > boxY[1] ? boxY[0] : boxY[1] / this.scale)
+          let boxX = this.mouseBox.x
+          let boxY = this.mouseBox.y
+          let startX = Math.round((boxX[0] < boxX[1] ? boxX[0] : boxX[1]) / this.scale)
+          let startY = Math.round((boxY[0] < boxY[1] ? boxY[0] : boxY[1]) / this.scale)
+          let endX = Math.round((boxX[0] > boxX[1] ? boxX[0] : boxX[1]) / this.scale)
+          let endY = Math.round((boxY[0] > boxY[1] ? boxY[0] : boxY[1]) / this.scale)
           for (let x = startX; x < endX; x++) {
             for (let y = startY; y < endY; y++) {
               for (let o in this.boundary[x][y]) {
                 let asset = this.boundary[x][y][o]
-                if (selected.includes(asset.id) === false) {
+                if (selected.includes(asset.id) === false && asset.selectable) {
                   selected.push(asset.id)
                   asset.select()
                 }
@@ -133,7 +136,11 @@ class Scene {
     for (let id in this.assets) {
       let asset = this.assets[id]
       if (typeof asset.ontick === 'function') asset.ontick()
-      if (asset.moveX || asset.moveY) asset.move(asset.moveX, asset.moveY)
+      else if (Array.isArray(asset.ontick)) {
+        asset.forEach(tickFunction => tickFunction.bind(asset)())
+      }
+      if (Array.isArray(asset.waypoint)) asset.moveTowardsWaypoint() 
+      else if (asset.moveX || asset.moveY) asset.move(asset.moveX, asset.moveY)
     }
   }
   

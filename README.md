@@ -76,7 +76,7 @@ class Tile extends Asset {
   
   state:State // See Scriptleaf State API
   
-  floor:Element // The background element
+  floor:DOM Element // The background element
   
   background:String // URL to image
   
@@ -85,12 +85,14 @@ class Tile extends Asset {
   innerWidth:Number
   
   innerHeight:Number
+  
+  mouseBox:DOM Element // The mouse drag Element. Will apply object values as default on creation. Can be disabled by making == false
 ```
 
 ## Asset
 ### Methods
 ```
-  changeSprite(imgURL:String): undefined // Changes DOM Element background to the image.
+  changeSprite(imgURL:String): undefined // Changes DOM Element background to the image
 
   move(x:Number, y:Number): undefined // Moves Asset to relative position
   
@@ -110,17 +112,19 @@ class Tile extends Asset {
 ```
 ### Listeners
 ```
-  oncreation(undefined)
+  oncreation(undefined) // Fired after the Asset's instance is created
   
-  ontick(undefined)
+  ontick(undefined) // Can be a function or an array of functions
   
-  ondestroy(undefined)
+  ondestroy(undefined) // Fires when the a Asset's instance is destroyed via the destroyInstance method
   
   oncollision(collidedObject:Asset):Boolean // if returns false, overlapping movement will not incur. Default returns false when collision is between two solid Assets.
   
   onselect(undefined) // By default fires whenever the asset is clicked or included in a drag box
   
   onunselect(undefined) // By default fires whenever the background is clicked
+  
+  onwaypointarrival(undefined) // Fires when arriving at waypoint. If does not return true, the active waypoint will be deleted. If returns array, the waypoint will be updated to that array
 ```
 ### Properties
 ```
@@ -128,17 +132,23 @@ class Tile extends Asset {
   
   state:State // See Scriptleaf State API
   
-  scene:Scene
+  scene:Scene // The scene to which the Asset belongs
   
-  follow:Boolean
+  follow:Boolean // Wether the camera will (on creation) or is (if already created) follow the Asset
+  
+  selectable:Boolean // If falsy, clicking and mouseboxes will not select the Asset
+  
+  waypoint:Array // [x, y] will travel asset.speed each tick towards waypoint
+  
+  speed:Number // The default speed when following a waypoint
   
   moveX:Number // Moves relatively on each tick, after the ontick method fires
   
   moveY:Number // Moves relatively on each tick, after the ontick method fires
   
-  x:Number
+  x:Number // The x grid coordinate in which the Asset is occupying
   
-  y:Number
+  y:Number // The y grid coordinate in which the Asset is occupying
   
-  id:String
+  id:String // Will default to a random string if not expressed on creation
 ```

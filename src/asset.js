@@ -8,6 +8,7 @@ class Asset {
     const defaults = {
       solid: true,
       follow: false,
+      speed: 5,
       moveX: 0,
       moveY: 0,
       x: 0,
@@ -26,7 +27,8 @@ class Asset {
       getScene: this.getScene.bind(this),
       rotate: this.rotate.bind(this),
       select: this.select.bind(this),
-      unselect: this.unselect.bind(this)
+      unselect: this.unselect.bind(this),
+      moveTowardsWaypoint: this.moveTowardsWaypoint.bind(this)
     }
     assignObject(this, defaults, overide)
     this.id = this.id || randID()
@@ -66,6 +68,8 @@ class Asset {
   }
   
   validateMovement (coordX, coordY) {
+    coordX = Math.round(coordX)
+    coordY = Math.round(coordY)
     let scene = this.getScene()
     let xLength = coordX + this.width
     let yLength = coordY + this.height
@@ -87,6 +91,8 @@ class Asset {
   }
   
   place (newX, newY) {
+    newX = Math.round(newX)
+    newY = Math.round(newY)
     let scene = this.getScene()
     if (scene) {
       let xLength = this.x + this.width
@@ -157,6 +163,40 @@ class Asset {
     if (scene === false) return false
     delete scene.selected[this.id]
     if (typeof this.onunselect === 'function') return this.onunselect()
+  }
+  
+  moveTowardsWaypoint () {
+    let moveX = 0, moveY = 0
+    if (this.waypoint[0] < this.x) {
+      let newSpot = this.x - this.speed
+      if (newSpot < this.waypoint[0]) moveX = this.waypoint[0] - newSpot
+      else if (newSpot > this.waypoint[0]) moveX = this.speed * -1
+    } else if (this.waypoint[0] > this.x) {
+      let newSpot = this.x + this.speed
+      if (newSpot > this.waypoint[0]) moveX = this.waypoint[0] - newSpot
+      else if (newSpot < this.waypoint[0]) moveX = this.speed
+    }
+    if (this.waypoint[1] < this.y) {
+      let newSpot = this.y - this.speed
+      if (newSpot < this.waypoint[1]) moveY = this.waypoint[1] - newSpot
+      else if (newSpot > this.waypoint[1]) moveY = this.speed * -1
+    } else if (this.waypoint[1] > this.y) {
+      let newSpot = this.y + this.speed
+      if (newSpot > this.waypoint[1]) moveY = this.waypoint[1] - newSpot
+      else if (newSpot < this.waypoint[1]) moveY = this.speed
+    }
+    if (Math.round(this.waypoint[0]) === this.x && this.waypoint[1] === Math.round(this.y)) {
+      this.place(this.waypoint[0], this.waypoint[1])
+      if (typeof this.onwaypointarrival === 'function') {
+        let response
+        response = this.onwaypointarrival()
+        if (Array.isArray(response)) this.waypoint = response
+        else if (response !== true) delete this.waypoint
+      }
+      else delete this.waypoint
+    } else {
+      this.move(moveX, moveY)
+    }
   }
 }
 
