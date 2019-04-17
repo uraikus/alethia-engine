@@ -1,6 +1,6 @@
 {
   "name": "alethia-engine",
-  "version": "1.1.15",
+  "version": "1.1.29",
   "description": "A general purpose application engine.",
   "main": "main.js",
   "author": "Patrick Trester",

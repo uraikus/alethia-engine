@@ -53,17 +53,20 @@ class Scene {
       this.mouseBox.x = []
       this.mouseBox.y = []
       this.floor.addEventListener('mousedown', ev => {
+        this.mouseDown = ev.button
         if (ev.button === 0) {
-          this.mouseBox.mouseDown = true
           this.mouseBox.x[0] = ev.offsetX
           this.mouseBox.y[0] = ev.offsetY
         }
       })
+      this.floor.addEventListener('contextmenu', ev => ev.preventDefault())
+      
       window.addEventListener('mouseup', ev => {
+        this.mouseDown = false
         if (ev.button !== 0) return undefined
-        if (this.mouseBox.mouseDown === true) {
+        if (this.mouseDown === 0) {
           let selected = []
-          this.mouseBox.mouseDown = false
+          this.mouseDown = false
           this.unselectAll()
           let boxX = this.mouseBox.x
           let boxY = this.mouseBox.y
@@ -75,7 +78,7 @@ class Scene {
             for (let y = startY; y < endY; y++) {
               for (let o in this.boundary[x][y]) {
                 let asset = this.boundary[x][y][o]
-                if (selected.includes(asset.id) === false && asset.selectable) {
+                if (selected.includes(asset.id) === false) {
                   selected.push(asset.id)
                   asset.select()
                 }
@@ -86,9 +89,10 @@ class Scene {
         this.mouseBox.style.display = 'none'
       })
       this.floor.addEventListener('mousemove', ev => {
+        this.mousePosition = [ev.offsetX / this.scale, ev.offsetY / this.scale]
         this.mouseBox.x[1] = ev.offsetX
         this.mouseBox.y[1] = ev.offsetY
-        if (this.mouseBox.mouseDown === true) {
+        if (this.mouseDown === 0) {
           this.mouseBox.style.display = 'block'
           let { x, y } = this.mouseBox
           let left, top, width, height
@@ -137,7 +141,7 @@ class Scene {
       let asset = this.assets[id]
       if (typeof asset.ontick === 'function') asset.ontick()
       else if (Array.isArray(asset.ontick)) {
-        asset.forEach(tickFunction => tickFunction.bind(asset)())
+        asset.ontick.forEach(tickFunction => tickFunction.bind(asset)())
       }
       if (Array.isArray(asset.waypoint)) asset.moveTowardsWaypoint() 
       else if (asset.moveX || asset.moveY) asset.move(asset.moveX, asset.moveY)
