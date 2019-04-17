@@ -82,11 +82,15 @@ class Tile extends Asset {
   
   fixedBackground:String // URL to image
   
-  innerWidth:Number
+  innerWidth:Number // The x cells in the scene
   
-  innerHeight:Number
+  innerHeight:Number // The y cells in the scene
   
   mouseBox:DOM Element // The mouse drag Element. Will apply object values as default on creation. Can be disabled by making == false
+  
+  mousePosition:Array // [x, y] of mouse position
+  
+  mouseDown:Number || false // Will be the value of the mousedown.button event value or false on mouse up
 ```
 
 ## Asset

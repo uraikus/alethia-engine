@@ -28,7 +28,8 @@ class Asset {
       rotate: this.rotate.bind(this),
       select: this.select.bind(this),
       unselect: this.unselect.bind(this),
-      moveTowardsWaypoint: this.moveTowardsWaypoint.bind(this)
+      moveTowardsWaypoint: this.moveTowardsWaypoint.bind(this),
+      deleteBoundary: this.deleteBoundary.bind(this)
     }
     assignObject(this, defaults, overide)
     this.id = this.id || randID()
@@ -43,7 +44,13 @@ class Asset {
     if (this.getScene() !== false) this.scene.addAsset(this)
     if (typeof this.sprite === 'string') this.changeSprite(this.sprite)
     this.place(this.x, this.y)
-    this.elem.addEventListener('mousedown', this.select.bind(this))
+    this.elem.addEventListener('mousedown', () => {
+      let scene = this.getScene()
+      if (scene) {
+        scene.unselectAll()
+        this.select.bind(this)()
+      }
+    })
   }
   
   oncollision (object) {
@@ -68,17 +75,19 @@ class Asset {
   }
   
   validateMovement (coordX, coordY) {
-    coordX = Math.round(coordX)
-    coordY = Math.round(coordY)
+    let collided = []
+    let floorX = Math.floor(coordX)
+    let floorY = Math.floor(coordY)
     let scene = this.getScene()
-    let xLength = coordX + this.width
-    let yLength = coordY + this.height
-    for (let x = coordX; x < xLength; x++) {
-      for (let y = coordY; y < yLength; y++) {
+    let xLength = Math.ceil(coordX + this.width)
+    let yLength = Math.ceil(coordY + this.height)
+    for (let x = floorX; x < xLength; x++) {
+      for (let y = floorY; y < yLength; y++) {
         let coord = scene.boundary[x][y]
         for (let id in coord) {
           let obj = coord[id]
-          if (obj.solid && obj !== this) {
+          if (obj.solid && obj !== this && collided.indexOf(id) === -1) {
+            collided.push(id)
             if (typeof obj.oncollision === 'function') obj.oncollision.bind(obj)(this)
             if (typeof this.oncollision === 'function') {
               if (this.oncollision.bind(this)(obj) === false) return false
@@ -90,22 +99,24 @@ class Asset {
     return true
   }
   
+  deleteBoundary () {
+    let xLength = Math.ceil(this.x + this.width)
+    let yLength = Math.ceil(this.y + this.height)
+    for (let x = Math.floor(this.x); x < xLength; x++) {
+      for (let y = Math.floor(this.y); y < yLength; y++) {
+        delete this.scene.boundary[x][y][this.id]
+      }
+    }
+  }
+  
   place (newX, newY) {
-    newX = Math.round(newX)
-    newY = Math.round(newY)
     let scene = this.getScene()
     if (scene) {
-      let xLength = this.x + this.width
-      let yLength = this.y + this.height
-      for (let x = this.x; x < xLength; x++) {
-        for (let y = this.y; y < yLength; y++) {
-          delete scene.boundary[x][y][this.id]
-        }
-      }
-      xLength = newX + this.width
-      yLength = newY + this.height
-      for (let x = newX; x < xLength; x++) {
-        for (let y = newY; y < yLength; y++) {
+      this.deleteBoundary()
+      let xLength = Math.ceil(newX) + this.width
+      let yLength = Math.ceil(newY) + this.height
+      for (let x = Math.floor(newX); x < xLength; x++) {
+        for (let y = Math.floor(newY); y < yLength; y++) {
           scene.boundary[x][y][this.id] = this
         }
       }
@@ -132,13 +143,18 @@ class Asset {
   }
   
   destroyInstance () {
+    if (this.destroyed) return false
     if (typeof this.ondestroy === 'function') this.ondestroy()
     let scene = this.getScene()
     if (scene) {
       if (this.follow) scene.unfollow()
+      this.deleteBoundary()
       delete scene.assets[this.id]
+      delete scene.selected[this.id]
     }
     this.elem.deleteElement()
+    this.destroyed = true
+    return true
   }
   
   getScene () {
@@ -152,6 +168,7 @@ class Asset {
   }
   
   select () {
+    if (this.selectable !== true) return false
     let scene = this.getScene()
     if (scene === false) return false
     scene.selected[this.id] = this
@@ -185,8 +202,7 @@ class Asset {
       if (newSpot > this.waypoint[1]) moveY = this.waypoint[1] - newSpot
       else if (newSpot < this.waypoint[1]) moveY = this.speed
     }
-    if (Math.round(this.waypoint[0]) === this.x && this.waypoint[1] === Math.round(this.y)) {
-      this.place(this.waypoint[0], this.waypoint[1])
+    if (Math.round(moveX) === 0 && Math.round(moveY) === 0) {
       if (typeof this.onwaypointarrival === 'function') {
         let response
         response = this.onwaypointarrival()
